@@ -127,33 +127,6 @@ function TMSEEG(subj_str,active, subj_intensity)
     end
     pause(1)
     
-    
-    
-    %% 3) Resting EEG Sound ON
-    %instructions
-    text = sprintf('Resting EEG - Sound ON \n\n Look at the Cross #1 \n\nRelax while looking at the cross on the screen. \nYou don''t need to make any responses. \n\nThis part will take ~1 min.');
-    DrawFormattedText(windowPtr,text,'center','center',white);
-    Screen('Flip',windowPtr);
-    contkeycode(operator_button)=0;
-    while contkeycode(operator_button)==0
-        [s, contkeycode, delta] = KbWait();
-    end
-    Resting(eeg_rest, windowPtr, black,white,red,x_centre,y_centre,SerialPortObj)
-    pause(1)
-    
-    %% 4) Resting EEG Sound OFF
-    %instructions
-    text = sprintf('Resting EEG - Sound OFF \n\n Look at the Cross #1 \n\nRelax while looking at the cross on the screen. \nYou don''t need to make any responses. \n\nThis part will take ~1 min.');
-    DrawFormattedText(windowPtr,text,'center','center',white);
-    Screen('Flip',windowPtr);
-    contkeycode(operator_button)=0;
-    while contkeycode(operator_button)==0
-        [s, contkeycode, delta] = KbWait();
-    end
-    Resting(eeg_rest, windowPtr, black,white,red,x_centre,y_centre,SerialPortObj)
-    pause(1)
-        
-    
     %% 5) PEST
     %instructions
     text = sprintf('Pre-Task Procedure (PEST) \n\nKeep your eyes on the cross, and while the ARROW is RED \npay attention to the tapping sensation on your hand. \nOnce the cross turns GREEN, report whether you felt a tap or not. \n\nPress ''Y'' with your left index finger for ''Yes'' \nor ''N'' with your left middle finger for ''No''. \n\nYour response will only count when the cross is GREEN. \n\nThis part will take a few mins.');
@@ -282,30 +255,7 @@ function TMSEEG(subj_str,active, subj_intensity)
     end
     S1_Loc(SIloc_trials, SerialPortObj,windowPtr,black, white, red, x_centre, y_centre, da, dd, sinewave,supra)
     pause(1)
-    
-    
-    %% 9) Resting EEG Sound ON
-    %instructions
-    text = sprintf('Resting EEG - Sound ON \n\n Look at the Cross #2 \n \n Just relax and look at the cross.\n You don''t need to make any responses.\n\n This part will take ~1 min.');
-    DrawFormattedText(windowPtr,text,'center','center',white);
-    Screen('Flip',windowPtr)
-    contkeycode(operator_button)=0;
-    while contkeycode(operator_button)==0
-        [s, contkeycode, delta] = KbWait();
-    end
-    Resting(eeg_rest, windowPtr, black,white,red,x_centre,y_centre,SerialPortObj)   
-    
-    %% 10) Resting EEG Sound OFF
-    %instructions
-    text = sprintf('Resting EEG - Sound OFF \n\n Look at the Cross #2 \n \nThis is the last part!\n\n Just relax and look at the cross.\n You don''t need to make any responses.\n\n This part will take ~1 min.');
-    DrawFormattedText(windowPtr,text,'center','center',white);
-    Screen('Flip',windowPtr)
-    contkeycode(operator_button)=0;
-    while contkeycode(operator_button)==0
-        [s, contkeycode, delta] = KbWait();
-    end
-    Resting(eeg_rest, windowPtr, black,white,red,x_centre,y_centre,SerialPortObj)  
-    
+
     
     %All done
     text = sprintf('You''ve completed today''s session - thank you!!');
