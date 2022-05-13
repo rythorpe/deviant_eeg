@@ -1,4 +1,4 @@
-function [trainIaccuracy,repeat] = Training_I(training_trials,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button,supra)
+function [trainIaccuracy,repeat] = Training_I(training_trials,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button,supra,baseline_stim,dev_std_stim)
 
     % define events
     event_cue = 4;
@@ -45,7 +45,9 @@ function [trainIaccuracy,repeat] = Training_I(training_trials,subj_str,output_di
 
     %% 5) For loop of actual task
     accuracy =[];
+    run_length = 0;
     for trial = 1:training_trials
+        RT_dev = 0;
         RT_max = 0;
         RT_mid = 0;
         RT_min = 0;
@@ -56,6 +58,71 @@ function [trainIaccuracy,repeat] = Training_I(training_trials,subj_str,output_di
         % 4) Record response
         % 5) Repeat for other two intensities
         % 6) Update stimulation intensities
+
+        
+        %-----------------------------------------------------------------
+        %% Delivery of Baseline/Dev stimulus
+        delay_time_max = delay_times(randi([1 size(delay_times,2)]));
+        %Draw cue
+        Screen('DrawLines', windowPtr, cross_coords,2, white, [x_centre, y_centre]); 
+        Screen('DrawLines', windowPtr, cue_up_coords,10, white, [x_centre, y_centre]);
+        Screen('DrawLines', windowPtr, cue_down_coords,10, red, [x_centre, y_centre]); 
+        Screen('Flip', windowPtr);
+        % event
+        fwrite(SerialPortObj, event_cue,'sync');
+        fwrite(SerialPortObj, 0,'sync');
+        cue_time_dev = GetSecs;
+
+        %Deliver Max stimulus
+        if rand > 0.8 && run_length > 2
+            stimulus = (baseline + randn * dev_std_stim) * sinewave;
+            run_length = 0;
+        else
+            stimulus = baseline_stim * sinewave;
+            run_length += 1;
+        end
+        preload(da, stimulus)
+            waiting=1;
+            while waiting  
+                if (GetSecs - cue_time_dev) > delay_time_max
+                        start(da) %tap
+                        tap_time_dev = GetSecs;
+                        write(dd,[1]) %event
+                        write(dd,[0])
+                    waiting=0;
+                end
+            end       
+
+        pause(2 - delay_time_dev - .01)%%%
+        stop(da)  
+
+        %Draw green crosshair   
+        Screen('DrawLines', windowPtr, cross_coords,2, green, [x_centre, y_centre]); 
+        Screen('DrawLines', windowPtr, cue_up_coords,10, green, [x_centre, y_centre]);
+        Screen('DrawLines', windowPtr, cue_down_coords,10, green, [x_centre, y_centre]);  
+        %flip everything
+        waiting=1;
+        while waiting 
+            if (GetSecs - cue_time_dev) > 2
+                Screen('Flip', windowPtr);
+                waiting=0;
+            end
+        end
+
+        %event
+        fwrite(SerialPortObj, event_respcue,'sync');
+        fwrite(SerialPortObj, 0,'sync');
+
+        % Response
+        respcue_time_dev = GetSecs();
+        [s, keyCode_max, delta_max] = KbWait(-3, 2, GetSecs()+1);
+
+        %get RT
+        if keyCode_max(yes_button) | keyCode_max(no_button)
+             RT_dev = s - respcue_time_dev;
+        end
+
+        pause(1 - RT_dev);
 
         %-----------------------------------------------------------------
         %% Delivery of Max stimulus
@@ -239,7 +306,9 @@ function [trainIaccuracy,repeat] = Training_I(training_trials,subj_str,output_di
 
         accuracy = [accuracy;max_detected; mid_detected; keyCode_min(no_button)];
         %save
-        count = count + 3;    
+        count = count + 3;
+        fprintf(trainingI_results,'\n%i\t%i\t%2.2f\t%i\t%i\t%2.2f\t%2.2f\t%2.2f\t',...
+                count-2,2,dev_stim, dev_detected,round(RT_dev*1000),tap_time_dev-cue_time_dev,respcue_time_dev-cue_time_dev,cue_time_dev);
         fprintf(trainingI_results,'\n%i\t%i\t%2.2f\t%i\t%i\t%2.2f\t%2.2f\t%2.2f\t',...
                 count-2,2,max_stim, max_detected,round(RT_max*1000),tap_time_max-cue_time_max,respcue_time_max-cue_time_max,cue_time_max);
         fprintf(trainingI_results,'\n%i\t%i\t%2.2f\t%i\t%i\t%2.2f\t%2.2f\t%2.2f\t',...

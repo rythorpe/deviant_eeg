@@ -1,4 +1,4 @@
-function [detection_threshold,repeat] =  PEST(max_trials,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button)
+function [detection_threshold,repeat, baseline_stim, dev_std_stim] =  PEST(max_trials,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button)
 % 
 % From the IRB:
 % This algorithm follows (Dai 1995) and (Jones 2007) in determining the
@@ -357,7 +357,11 @@ intensities = [keep_max, keep_mid, keep_min];
 detections = [keep_max_detected, keep_mid_detections, keep_min_detections];
 [b, dev, stats] = glmfit(intensities, detections, 'binomial', 'logit');
 logit_fit = glmval(b, intensities, 'logit');
-
+x_80 = (log(0.8 / (1 - 0.8)) - b(1)) / b(2);  % intensity with 0.8 detection rate
+x_80_derivative = (b(2) * exp(b(1) - (b(2) * x_80))) / (exp(b(1) - (b(2) * x_80)) + 1)^2;  % slope at target intensity
+x_diff_10 = 0.1 / x_80_derivative;  % intensity change that increases or decreases the detection rate by +/-0.1
+baseline_stim = x_80;
+dev_std_stim = x_diff_10;
 
 % plot 
 figure
@@ -371,7 +375,9 @@ title('Intensity Updating')
 ylabel('Intensity')
 xlabel('Trials')
 subplot(1, 2, 2)
-plot(intensities, detections, 'ks', intensities, logit_fit, 'r-')
+[I_sorted, I_idx] = sort(intensities);
+logit_fit_sorted = logit_fit(I_idx);
+plot(intensities, detections, 'ks', I_sorted, logit_fit_sorted, 'r-')
 title('Psychometric Curve')
 ylabel('Detection Probability')
 xlabel('Intensity')

@@ -111,7 +111,7 @@ function TMSEEG(subj_str,active, subj_intensity)
         [s, contkeycode, delta] = KbWait();
     end
     trainIacc=0;
-    [trainIacc,repeat] = Training_I(training_trials1,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button,supra);
+    [trainIacc,repeat] = Training_I(training_trials1,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button,supra,baseline_stim,dev_std_stim);
     fprintf(experiment_notes, '\n TrainingI: %i%% ', trainIacc); 
     if repeat
         fprintf(experiment_notes, '\n Training I repeated'); 
@@ -148,7 +148,7 @@ function TMSEEG(subj_str,active, subj_intensity)
         while contkeycode(operator_button)==0
             [s, contkeycode, delta] = KbWait();
         end
-        [detection_threshold,repeat] =  PEST(max_pest_trials,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button);
+        [detection_threshold,repeat, baseline_stim, dev_std_stim] =  PEST(max_pest_trials,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button);
         fprintf(experiment_notes, '\n Threshold: %2.2f ', detection_threshold); 
     end
     pause(1)
