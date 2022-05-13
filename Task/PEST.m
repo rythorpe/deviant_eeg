@@ -32,6 +32,9 @@ detection_threshold = 1;
 keep_max = [];
 keep_mid = [];
 keep_min = [];
+keep_max_detected = [];
+keep_mid_detected = [];
+keep_min_detected = [];
 max_memory=[];
 %Initialize variable to detect 5 um difference
 delta_threshold = .01; % the equivalent of 5 um
@@ -280,6 +283,11 @@ while threshold_not_reached & trial <= max_trials
     keep_max = [keep_max, max_stim];
     keep_mid = [keep_mid, mid_stim];
     keep_min = [keep_min, min_stim];
+    
+    keep_max_detected = [keep_max_detected, max_detected];
+    keep_mid_detected = [keep_mid_detected, mid_detected];
+    keep_min_detected = [keep_min_detected, min_detected];
+    
     update = 0;
     
     %%sanity check
@@ -343,15 +351,30 @@ while threshold_not_reached & trial <= max_trials
 
 end
 detection_threshold = mid_stim;
+
+% fit psychometric curve
+intensities = [keep_max, keep_mid, keep_min];
+detections = [keep_max_detected, keep_mid_detections, keep_min_detections];
+[b, dev, stats] = glmfit(intensities, detections, 'binomial', 'logit');
+logit_fit = glmval(b, intensities, 'logit');
+
+
 % plot 
-figure 
+figure
+subplot(1, 2, 1)
 hold on
 plot(keep_min,'--','Color',[.5 .5 .5])
 plot(keep_max,'--','Color',[.5 .5 .5])
 plot(keep_mid,'r-','Linewidth',2)
+hold off
 title('Intensity Updating')
 ylabel('Intensity')
 xlabel('Trials')
+subplot(1, 2, 2)
+plot(intensities, detections, 'ks', intensities, logit_fit, 'r-')
+title('Psychometric Curve')
+ylabel('Detection Probability')
+xlabel('Intensity')
 getcd = cd()
 cd(output_directory)
 print(gcf,'PEST','-dpng')
