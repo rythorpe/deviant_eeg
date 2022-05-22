@@ -91,9 +91,8 @@ while threshold_not_reached && trial <= max_trials
     Screen('DrawLines', windowPtr, cross_coords,2, red, [x_centre, y_centre]);
     Screen('Flip', windowPtr);
     % event
-%     fwrite(SerialPortObj, event_cue,'sync');
-    fwrite(SerialPortObj, 4,'sync');
-    fwrite(SerialPortObj, 0,'sync');
+    fwrite(SerialPortObj, event_cue, 'uint8');
+    fwrite(SerialPortObj, 0, 'uint8');
     cue_time_max = GetSecs;
     
     %Deliver Max stimulus
@@ -105,8 +104,8 @@ while threshold_not_reached && trial <= max_trials
             if (GetSecs - cue_time_max) > delay_time_max
                     start(da) %tap
                     tap_time_max = GetSecs;
-                    write(dd,[1]) %event
-                    write(dd,[0])
+                    write(dd, 1, 'uint8') %event
+                    write(dd, 0, 'uint8')
                 waiting=0;
             end
         end       
@@ -126,8 +125,8 @@ while threshold_not_reached && trial <= max_trials
     end
     
 	%event
-    fwrite(SerialPortObj, event_respcue,'sync');
-    fwrite(SerialPortObj, 0,'sync');
+    fwrite(SerialPortObj, event_respcue, 'uint8');
+    fwrite(SerialPortObj, 0, 'uint8');
     
     % Response
     respcue_time_max = GetSecs();
@@ -147,10 +146,8 @@ while threshold_not_reached && trial <= max_trials
     Screen('DrawLines', windowPtr, cross_coords,2, red, [x_centre, y_centre]);
     Screen('Flip', windowPtr);
     % event
-%     fwrite(SerialPortObj, event_cue,'sync');
-    fwrite(SerialPortObj, 4,'sync');
-
-    fwrite(SerialPortObj, 0,'sync');
+    fwrite(SerialPortObj, event_cue, 'uint8');
+    fwrite(SerialPortObj, 0, 'uint8');
     cue_time_mid = GetSecs;
     
     %Deliver Mid stimulus
@@ -161,8 +158,8 @@ while threshold_not_reached && trial <= max_trials
             if (GetSecs - cue_time_mid) >delay_time_mid
                     start(da) %tap
                     tap_time_mid = GetSecs;
-                    write(dd,[1]) %event
-                    write(dd,[0])
+                    write(dd, 1, 'uint8') %event
+                    write(dd, 0, 'uint8')
                 waiting=0;
             end
         end         
@@ -181,8 +178,8 @@ while threshold_not_reached && trial <= max_trials
     end
     
 	%event
-    fwrite(SerialPortObj, event_respcue,'sync');
-    fwrite(SerialPortObj, 0,'sync');
+    fwrite(SerialPortObj, event_respcue, 'uint8');
+    fwrite(SerialPortObj, 0, 'uint8');
     
     % Response
     respcue_time_mid = GetSecs();
@@ -201,10 +198,8 @@ while threshold_not_reached && trial <= max_trials
     Screen('DrawLines', windowPtr, cross_coords,2, red, [x_centre, y_centre]);
     Screen('Flip', windowPtr);
     % event
-%     fwrite(SerialPortObj, event_cue,'sync');
-    fwrite(SerialPortObj, 4,'sync');
-
-    fwrite(SerialPortObj, 0,'sync');
+    fwrite(SerialPortObj, event_cue, 'uint8');
+    fwrite(SerialPortObj, 0, 'uint8');
     cue_time_min = GetSecs;
     
     %Deliver Min stimulus
@@ -215,8 +210,8 @@ while threshold_not_reached && trial <= max_trials
             if (GetSecs - cue_time_min) >delay_time_min
                     start(da) %tap
                     tap_time_min = GetSecs;
-                    write(dd,[1]) %event
-                    write(dd,[0])
+                    write(dd, 1, 'uint8') %event
+                    write(dd, 0, 'uint8')
                 waiting=0;
             end
         end       
@@ -235,8 +230,8 @@ while threshold_not_reached && trial <= max_trials
     end
     
 	%event
-    fwrite(SerialPortObj, event_respcue,'sync');
-    fwrite(SerialPortObj, 0,'sync');
+    fwrite(SerialPortObj, event_respcue, 'uint8');
+    fwrite(SerialPortObj, 0, 'uint8');
     
     % Response
     respcue_time_min = GetSecs();

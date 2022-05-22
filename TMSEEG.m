@@ -32,16 +32,14 @@ function TMSEEG(subj_str,session)
     white = [255 255 255];
     red = [255,0,0];
     green = [0,255,0];    
-    SerialPortObj=serial('COM3', 'TimeOut', 1); % in this example x=3 SerialPortObj.BytesAvailableFcnMode='byte';
-    SerialPortObj.BytesAvailableFcnCount=1; 
-    SerialPortObj.BytesAvailableFcn=@ReadCallback;
+    SerialPortObj=serialport('COM3', 9600, 'TimeOut', 1); % in this example x=3 SerialPortObj.BytesAvailableFcnMode='byte';
     %%Psychtoolbox
     Screen('Preference','VisualDebugLevel',0);
     [windowPtr,rect]=Screen('OpenWindow', screenNumber, black);
     [x_centre, y_centre]=RectCenter(rect);
     %%Serialport
     fopen(SerialPortObj);
-    fwrite(SerialPortObj, 0,'sync');  
+    fwrite(SerialPortObj, 0, 'uint8');  
      %%Nidaq
     da = daq('ni'); %analog - tap
     dd = daq('ni'); % digital - event
@@ -84,11 +82,11 @@ function TMSEEG(subj_str,session)
 %% TEST
 
     for i = 1:3
-        fwrite(SerialPortObj, 0,'sync');
+        fwrite(SerialPortObj, 0, 'uint8');
         pause(2)
-        fwrite(SerialPortObj, 4,'sync');
+        fwrite(SerialPortObj, 4, 'uint8');
         pause(2)
-        fwrite(SerialPortObj, 16,'sync');
+        fwrite(SerialPortObj, 16, 'uint8');
         pause(2)
     end
 

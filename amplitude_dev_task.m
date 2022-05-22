@@ -47,8 +47,8 @@ function [trainIaccuracy,repeat] = amplitude_dev_task(training_trials,subj_str,o
         Screen('DrawLines', windowPtr, cross_coords,2, red, [x_centre, y_centre]);
         Screen('Flip', windowPtr);
         % event
-        fwrite(SerialPortObj, event_cue,'sync');
-        fwrite(SerialPortObj, 0,'sync');
+        fwrite(SerialPortObj, event_cue, 'uint8');
+        fwrite(SerialPortObj, 0, 'uint8');
         cue_time_dev = GetSecs;
 
         %Deliver Max stimulus
@@ -76,8 +76,8 @@ function [trainIaccuracy,repeat] = amplitude_dev_task(training_trials,subj_str,o
                 if (GetSecs - cue_time_dev) > delay_time_dev
                         start(da) %tap
                         tap_time_dev = GetSecs;
-                        write(dd,[1]) %event
-                        write(dd,[0])
+                        write(dd, 1, 'uint8') %event
+                        write(dd, 0, 'uint8')
                     waiting=0;
                 end
             end       
@@ -97,8 +97,8 @@ function [trainIaccuracy,repeat] = amplitude_dev_task(training_trials,subj_str,o
         end
 
         %event
-        fwrite(SerialPortObj, event_respcue,'sync');
-        fwrite(SerialPortObj, 0,'sync');
+        fwrite(SerialPortObj, event_respcue, 'uint8');
+        fwrite(SerialPortObj, 0, 'uint8');
 
         % Response
         respcue_time_dev = GetSecs();
