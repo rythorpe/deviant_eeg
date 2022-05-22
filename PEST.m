@@ -1,4 +1,4 @@
-function [detection_threshold,repeat, baseline_stim, dev_std_stim] =  PEST(max_trials,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,active,repeat_button)
+function [detection_threshold,repeat, baseline_stim, dev_std_stim] =  PEST(max_trials,subj_str,output_directory, SerialPortObj,windowPtr,black, white, red, green,x_centre, y_centre, da, dd, sinewave,yes_button,no_button,operator_button,session,repeat_button)
 % 
 % From the IRB:
 % This algorithm follows (Dai 1995) and (Jones 2007) in determining the
@@ -37,7 +37,8 @@ keep_mid_detected = [];
 keep_min_detected = [];
 max_memory=[];
 %Initialize variable to detect 5 um difference
-delta_threshold = .01; % the equivalent of 5 um
+% delta_threshold = .01; % the equivalent of 5 um
+delta_threshold = 0.002;
 
 %Initialize boolean for while loop
 threshold_not_reached = true;
@@ -51,7 +52,7 @@ count = 0;
 %init output
 pest_results = fopen(strcat(output_directory,subj_str,'_pest'), 'a');
 fprintf(pest_results, '\r\n \r\n %s ', datestr(now)); 
-fprintf(pest_results, '\n Session: %i ', active); 
+fprintf(pest_results, '\n Session: %i ', session); 
 fprintf(pest_results,'\nTrial\tType\tStim\tDetect\tRT\tTapTime\tRespTime\tCueTime\tUpdate');
 
 
@@ -60,25 +61,16 @@ cross=30;
 x_coords=[-cross, cross, 0, 0];
 y_coords=[0, 0, -cross, cross];
 cross_coords=[x_coords; y_coords];
-Screen('DrawLines', windowPtr, cross_coords,2, white, [x_centre, y_centre]);   
-%up cue
-x_coords=[-30,0,0,30];
-y_coords=[-50,-100,-100,-50];
-cue_up_coords=[x_coords; y_coords];
-Screen('DrawLines', windowPtr, cue_up_coords,10, white, [x_centre, y_centre]);   
-%down cue
-cue_down_coords=[x_coords; y_coords*-1];
-Screen('DrawLines', windowPtr, cue_down_coords,10, white, [x_centre, y_centre]); 
+Screen('DrawLines', windowPtr, cross_coords,2, white, [x_centre, y_centre]);
 %flip everything
 Screen('Flip', windowPtr);
 
 % Wait for any key press to start 
 KbStrokeWait()
 
-
 %% 5) For loop of actual task
 trial = 0;
-while threshold_not_reached & trial <= max_trials
+while threshold_not_reached && trial <= max_trials
     trial = trial+1;
     RT_max = 0;
     RT_mid = 0;
@@ -96,12 +88,11 @@ while threshold_not_reached & trial <= max_trials
     %% Delivery of Max stimulus
     delay_time_max = delay_times(randi([1 size(delay_times,2)]));
     %Draw cue
-    Screen('DrawLines', windowPtr, cross_coords,2, white, [x_centre, y_centre]); 
-    Screen('DrawLines', windowPtr, cue_up_coords,10, white, [x_centre, y_centre]);
-    Screen('DrawLines', windowPtr, cue_down_coords,10, red, [x_centre, y_centre]); 
+    Screen('DrawLines', windowPtr, cross_coords,2, red, [x_centre, y_centre]);
     Screen('Flip', windowPtr);
     % event
-    fwrite(SerialPortObj, event_cue,'sync');
+%     fwrite(SerialPortObj, event_cue,'sync');
+    fwrite(SerialPortObj, 4,'sync');
     fwrite(SerialPortObj, 0,'sync');
     cue_time_max = GetSecs;
     
@@ -124,9 +115,7 @@ while threshold_not_reached & trial <= max_trials
     stop(da)  
     
     %Draw green crosshair   
-    Screen('DrawLines', windowPtr, cross_coords,2, green, [x_centre, y_centre]); 
-    Screen('DrawLines', windowPtr, cue_up_coords,10, green, [x_centre, y_centre]);
-    Screen('DrawLines', windowPtr, cue_down_coords,10, green, [x_centre, y_centre]);  
+    Screen('DrawLines', windowPtr, cross_coords,2, green, [x_centre, y_centre]);
     %flip everything
     waiting=1;
     while waiting 
@@ -145,7 +134,7 @@ while threshold_not_reached & trial <= max_trials
     [s, keyCode_max, delta_max] = KbWait(-3, 2, GetSecs()+1);
        
     %get RT
-    if keyCode_max(yes_button) | keyCode_max(no_button)
+    if keyCode_max(yes_button) || keyCode_max(no_button)
          RT_max = s - respcue_time_max;
     end
         
@@ -155,12 +144,12 @@ while threshold_not_reached & trial <= max_trials
     %% Delivery of Mid stimulus
     delay_time_mid = delay_times(randi([1 size(delay_times,2)]));
     %Draw cue
-    Screen('DrawLines', windowPtr, cross_coords,2, white, [x_centre, y_centre]); 
-    Screen('DrawLines', windowPtr, cue_up_coords,10, white, [x_centre, y_centre]);
-    Screen('DrawLines', windowPtr, cue_down_coords,10, red, [x_centre, y_centre]); 
+    Screen('DrawLines', windowPtr, cross_coords,2, red, [x_centre, y_centre]);
     Screen('Flip', windowPtr);
     % event
-    fwrite(SerialPortObj, event_cue,'sync');
+%     fwrite(SerialPortObj, event_cue,'sync');
+    fwrite(SerialPortObj, 4,'sync');
+
     fwrite(SerialPortObj, 0,'sync');
     cue_time_mid = GetSecs;
     
@@ -183,8 +172,6 @@ while threshold_not_reached & trial <= max_trials
                     
     %Draw green crosshair   
     Screen('DrawLines', windowPtr, cross_coords,2, green, [x_centre, y_centre]); 
-    Screen('DrawLines', windowPtr, cue_up_coords,10, green, [x_centre, y_centre]);
-    Screen('DrawLines', windowPtr, cue_down_coords,10, green, [x_centre, y_centre]);  
     waiting=1;
     while waiting 
         if (GetSecs - cue_time_mid > 2)
@@ -211,12 +198,12 @@ while threshold_not_reached & trial <= max_trials
     %% Delivery of Min stimulus
     delay_time_min = delay_times(randi([1 size(delay_times,2)]));
     %Draw cue
-    Screen('DrawLines', windowPtr, cross_coords,2, white, [x_centre, y_centre]); 
-    Screen('DrawLines', windowPtr, cue_up_coords,10, white, [x_centre, y_centre]);
-    Screen('DrawLines', windowPtr, cue_down_coords,10, red, [x_centre, y_centre]); 
+    Screen('DrawLines', windowPtr, cross_coords,2, red, [x_centre, y_centre]);
     Screen('Flip', windowPtr);
     % event
-    fwrite(SerialPortObj, event_cue,'sync');
+%     fwrite(SerialPortObj, event_cue,'sync');
+    fwrite(SerialPortObj, 4,'sync');
+
     fwrite(SerialPortObj, 0,'sync');
     cue_time_min = GetSecs;
     
@@ -238,9 +225,7 @@ while threshold_not_reached & trial <= max_trials
     stop(da) 
     
     %Draw green crosshair   
-    Screen('DrawLines', windowPtr, cross_coords,2, green, [x_centre, y_centre]); 
-    Screen('DrawLines', windowPtr, cue_up_coords,10, green, [x_centre, y_centre]);
-    Screen('DrawLines', windowPtr, cue_down_coords,10, green, [x_centre, y_centre]);  
+    Screen('DrawLines', windowPtr, cross_coords,2, green, [x_centre, y_centre]);
     waiting=1;
     while waiting 
         if (GetSecs - cue_time_max) > 2
@@ -258,7 +243,7 @@ while threshold_not_reached & trial <= max_trials
     [s, keyCode_min, delta_min] = KbWait(-3, 2, GetSecs()+1);
     RT_min = s - respcue_time_min;
     %get RT
-    if keyCode_max(yes_button) | keyCode_max(no_button)
+    if keyCode_max(yes_button) || keyCode_max(no_button)
          RT_min = s - respcue_time_min;
     end
            
@@ -347,18 +332,33 @@ while threshold_not_reached & trial <= max_trials
     end
     %%% what if max is not detected? many scenarios in which nothing
     %%% happens
-    fprintf(pest_results,'%i',update)
+    fprintf(pest_results,'%i',update);
 
 end
 detection_threshold = mid_stim;
 
 % fit psychometric curve
-intensities = [keep_max, keep_mid, keep_min];
-detections = [keep_max_detected, keep_mid_detections, keep_min_detections];
-[b, dev, stats] = glmfit(intensities, detections, 'binomial', 'logit');
-logit_fit = glmval(b, intensities, 'logit');
-x_80 = (log(0.8 / (1 - 0.8)) - b(1)) / b(2);  % intensity with 0.8 detection rate
-x_80_derivative = (b(2) * exp(b(1) - (b(2) * x_80))) / (exp(b(1) - (b(2) * x_80)) + 1)^2;  % slope at target intensity
+intensities = [keep_max(end-5:end), keep_mid(end-5:end), keep_min(end-5:end)]';
+detections = [keep_max_detected(end-5:end), keep_mid_detected(end-5:end), keep_min_detected(end-5:end)]';
+b = glmfit(intensities, detections, 'binomial', 'logit');
+
+% while delta_b0 > delta_threshold
+%     
+%     for stim_idx=1:5
+%         stim_mag = detection_threshold + randn * b(1);
+%         stimulus = stim_mag * sinewave;
+%         
+%     end
+% end    
+
+    
+
+x_range = max_stim - mid_stim;
+logit_x = linspace(mid_stim-x_range, mid_stim+x_range, 100);
+logit_fit = glmval(b, logit_x, 'logit');
+y = 0.8;
+x_80 = (log(y / (1 - y)) - b(1)) / b(2);  % intensity with 0.8 detection rate
+x_80_derivative = (b(2) * exp(b(1) + (b(2) * x_80))) / (exp(b(1) + (b(2) * x_80)) + 1)^2;  % slope at target intensity
 x_diff_10 = 0.1 / x_80_derivative;  % intensity change that increases or decreases the detection rate by +/-0.1
 baseline_stim = x_80;
 dev_std_stim = x_diff_10;
@@ -375,13 +375,18 @@ title('Intensity Updating')
 ylabel('Intensity')
 xlabel('Trials')
 subplot(1, 2, 2)
-[I_sorted, I_idx] = sort(intensities);
-logit_fit_sorted = logit_fit(I_idx);
-plot(intensities, detections, 'ks', I_sorted, logit_fit_sorted, 'r-')
+hold on
+% [I_sorted, I_idx] = sort(intensities);
+% logit_fit_sorted = logit_fit(I_idx);
+%plot(intensities, detections, 'ks')
+plot(logit_x, logit_fit, 'r-')
+plot(detection_threshold, glmval(b, detection_threshold, 'logit'), 'ks');
+plot(baseline_stim, glmval(b, baseline_stim, 'logit'), 'bs');
+hold off
 title('Psychometric Curve')
 ylabel('Detection Probability')
 xlabel('Intensity')
-getcd = cd()
+getcd = cd();
 cd(output_directory)
 print(gcf,'PEST','-dpng')
 close all
@@ -399,7 +404,7 @@ DrawFormattedText(windowPtr,text,'center',200,white);
 Screen('Flip',windowPtr)
 contkeycode(operator_button)=0;
 contkeycode(repeat_button)=0;
-while contkeycode(operator_button)==0 & contkeycode(repeat_button)==0
+while contkeycode(operator_button)==0 && contkeycode(repeat_button)==0
     [s, contkeycode, delta] = KbWait();
     repeat = 0;
     if contkeycode(repeat_button)
